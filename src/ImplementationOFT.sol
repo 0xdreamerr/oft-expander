@@ -19,6 +19,9 @@ contract ImplementationOFT is OFTUpgradeable {
 
     /* ======== ERRORS ======== */
 
+    error WrongAllocationParams();
+    error ZeroAddress();
+
     /* ======== EVENTS ======== */
 
     event TokenCreated(address OFT);
@@ -31,18 +34,20 @@ contract ImplementationOFT is OFTUpgradeable {
     function initialize(
         string memory _name,
         string memory _symbol,
-        //address _delegate,
         address[] memory users,
         uint[] memory amounts,
+        address _owner,
         address _lzEndpoint
-    ) public initializer {
+    ) external initializer {
+        _transferOwnership(_owner);
+        require(users.length == amounts.length, WrongAllocationParams());
         __ERC20_init(_name, _symbol);
-        //__OFTCore_init(_delegate);
         lzEndpoint = _lzEndpoint;
 
         emit TokenCreated(this.token());
 
         for (uint i = 0; i < users.length; i++) {
+            require(users[i] != address(0), ZeroAddress());
             _mint(users[i], amounts[i]);
         }
 
@@ -50,6 +55,11 @@ contract ImplementationOFT is OFTUpgradeable {
     }
 
     /* ======== EXTERNAL/PUBLIC ======== */
+
+    function setPeers(uint32 chainId, bytes32 targetAddress) public {
+        setPeer(chainId, targetAddress);
+    }
+
     /* ======== INTERNAL ======== */
     /* ======== ADMIN ======== */
     /* ======== VIEW ======== */

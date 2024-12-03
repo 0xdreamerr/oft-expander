@@ -19,9 +19,9 @@ contract InitializeOFTTest is Test, SetupOFT {
         implementationOFT.initialize(
             name,
             symbol,
-            //delegate,
             users,
             amounts,
+            owner,
             lzEndpoint
         );
 
@@ -36,9 +36,9 @@ contract InitializeOFTTest is Test, SetupOFT {
         implementationOFT.initialize(
             name,
             symbol,
-            //delegate,
             users,
             amounts,
+            owner,
             lzEndpoint
         );
 
@@ -46,10 +46,53 @@ contract InitializeOFTTest is Test, SetupOFT {
         implementationOFT.initialize(
             name,
             symbol,
-            //delegate,
             users,
             amounts,
+            owner,
             lzEndpoint
         );
+    }
+
+    function test_RevertIf_WrongAllocationParams() public {
+        // set 3 users and 2 amounts
+        users = [owner, userB, address(0x4)];
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+
+        vm.startPrank(owner);
+        vm.expectRevert(ImplementationOFT.WrongAllocationParams.selector);
+        implementationOFT.initialize(
+            name,
+            symbol,
+            users,
+            amounts,
+            owner,
+            lzEndpoint
+        );
+    }
+
+    function test_RevertIf_ReceiverIsZeroAddress() public {
+        users = [owner, address(0)];
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+
+        vm.startPrank(owner);
+        vm.expectRevert(ImplementationOFT.ZeroAddress.selector);
+        implementationOFT.initialize(
+            name,
+            symbol,
+            users,
+            amounts,
+            owner,
+            lzEndpoint
+        );
+    }
+
+    function test_RevertIf_NotOwner() public {
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+        bytes32 x = bytes32(uint256(uint160(address(userB))));
+
+        // not owner
+        vm.startPrank(userB);
+        vm.expectRevert();
+        implementationOFT.setPeers(10, x);
     }
 }
