@@ -11,9 +11,12 @@ optimizer_runs=1000000
 remappings = [
     "forge-std/=lib/forge-std/src/",
     "@openzeppelin/=node_modules/@openzeppelin/",
+    "@layerzerolabs/oapp-evm-upgradeable=lib/devtools/packages/oapp-evm-upgradeable",
     '@layerzerolabs/oft-evm/=lib/devtools/packages/oft-evm/',
     '@layerzerolabs/oapp-evm/=lib/devtools/packages/oapp-evm/',
-    '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol'
+    '@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol',
+    "@openzeppelin/contracts-upgradeable=node_modules/@openzeppelin/contracts-upgradeable",
+    "@layerzerolabs/devtools=lib/devtools/"
 ]
 
 fs_permissions = [
