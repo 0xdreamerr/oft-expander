@@ -15,6 +15,9 @@ contract Expander {
     address public lzEndpoint;
 
     /* ======== ERRORS ======== */
+
+    error ZeroAddress();
+
     /* ======== EVENTS ======== */
 
     event ProxyCreated(address proxy);
@@ -47,6 +50,7 @@ contract Expander {
         );
 
         emit ProxyCreated(proxy);
+
         return proxy;
     }
 

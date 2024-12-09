@@ -9,7 +9,7 @@ import {Initializable} from "node_modules/@openzeppelin/contracts-upgradeable/pr
 
 contract InitializeOFTTest is Test, SetupOFT {
     function setUp() public override {
-        super.setUp();
+        setUpForBasicTests();
     }
 
     function test_allocation() public {
@@ -56,6 +56,7 @@ contract InitializeOFTTest is Test, SetupOFT {
     function test_RevertIf_WrongAllocationParams() public {
         // set 3 users and 2 amounts
         users = [owner, userB, address(0x4)];
+
         implementationOFT = new ImplementationOFT(lzEndpoint);
 
         vm.startPrank(owner);
@@ -72,6 +73,7 @@ contract InitializeOFTTest is Test, SetupOFT {
 
     function test_RevertIf_ReceiverIsZeroAddress() public {
         users = [owner, address(0)];
+
         implementationOFT = new ImplementationOFT(lzEndpoint);
 
         vm.startPrank(owner);
@@ -88,11 +90,13 @@ contract InitializeOFTTest is Test, SetupOFT {
 
     function test_RevertIf_NotOwner() public {
         implementationOFT = new ImplementationOFT(lzEndpoint);
-        bytes32 x = bytes32(uint256(uint160(address(userB))));
 
         // not owner
         vm.startPrank(userB);
         vm.expectRevert();
-        implementationOFT.setPeers(10, x);
+        implementationOFT.setPeers(
+            10,
+            bytes32(uint256(uint160(address(userB))))
+        );
     }
 }

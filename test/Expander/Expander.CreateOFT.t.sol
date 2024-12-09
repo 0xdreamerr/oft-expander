@@ -9,7 +9,7 @@ import {Script, console} from "forge-std/Script.sol";
 
 contract ExpanderTest is Test, SetupOFT {
     function setUp() public override {
-        super.setUp();
+        setUpForBasicTests();
     }
 
     function test_createProxy() public {
@@ -31,5 +31,44 @@ contract ExpanderTest is Test, SetupOFT {
         assert(proxy != address(0));
         assertEq(ImplementationOFT(proxy).balanceOf(userB), 400);
         assertEq(ImplementationOFT(proxy).balanceOf(owner), 100);
+    }
+
+    function test_createProxiesWithDifferentOwners() public {
+        vm.startPrank(owner);
+
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+        address oft = implementationOFT.token();
+
+        Expander expander = new Expander(oft);
+
+        address proxy = expander.createOFT(
+            name,
+            symbol,
+            users,
+            amounts,
+            owner,
+            lzEndpoint
+        );
+
+        address proxy2 = expander.createOFT(
+            name,
+            symbol,
+            users,
+            amounts,
+            userB,
+            lzEndpoint
+        );
+
+        // owner
+        vm.startPrank(owner);
+        ImplementationOFT(proxy).setPeers(10, bytes32(uint256(uint160(userB))));
+
+        // not owner
+        vm.startPrank(owner);
+        vm.expectRevert();
+        ImplementationOFT(proxy2).setPeers(
+            10,
+            bytes32(uint256(uint160(userB)))
+        );
     }
 }
