@@ -4,6 +4,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@layerzerolabs/create3-factory": "^3.0.27",
     "@layerzerolabs/lz-evm-v1-0.7": "^3.0.22",
     "@openzeppelin/contracts": "^5.0.2",
     "@openzeppelin/contracts-upgradeable": "^5.1.0",
