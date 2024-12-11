@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {ImplementationOFT} from "src/ImplementationOFT.sol";
-import {SetupOFT} from "./_.ImplementationOFT.Setup.sol";
+import {SetupOFT} from "../_.ExpandableSystem.Setup.sol";
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
 import {Initializable} from "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -14,16 +14,10 @@ contract InitializeOFTTest is Test, SetupOFT {
 
     function test_allocation() public {
         vm.startPrank(owner);
+
         implementationOFT = new ImplementationOFT(lzEndpoint);
 
-        implementationOFT.initialize(
-            name,
-            symbol,
-            users,
-            amounts,
-            owner,
-            lzEndpoint
-        );
+        implementationOFT.initialize(name, symbol, users, amounts, owner);
 
         assertEq(implementationOFT.balanceOf(userB), 400);
         assertEq(implementationOFT.balanceOf(owner), 100);
@@ -31,26 +25,13 @@ contract InitializeOFTTest is Test, SetupOFT {
 
     function test_RevertIf_SecondInitializing() public {
         vm.startPrank(owner);
+
         implementationOFT = new ImplementationOFT(lzEndpoint);
 
-        implementationOFT.initialize(
-            name,
-            symbol,
-            users,
-            amounts,
-            owner,
-            lzEndpoint
-        );
+        implementationOFT.initialize(name, symbol, users, amounts, owner);
 
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        implementationOFT.initialize(
-            name,
-            symbol,
-            users,
-            amounts,
-            owner,
-            lzEndpoint
-        );
+        implementationOFT.initialize(name, symbol, users, amounts, owner);
     }
 
     function test_RevertIf_WrongAllocationParams() public {
@@ -60,15 +41,9 @@ contract InitializeOFTTest is Test, SetupOFT {
         implementationOFT = new ImplementationOFT(lzEndpoint);
 
         vm.startPrank(owner);
+
         vm.expectRevert(ImplementationOFT.WrongAllocationParams.selector);
-        implementationOFT.initialize(
-            name,
-            symbol,
-            users,
-            amounts,
-            owner,
-            lzEndpoint
-        );
+        implementationOFT.initialize(name, symbol, users, amounts, owner);
     }
 
     function test_RevertIf_ReceiverIsZeroAddress() public {
@@ -77,15 +52,9 @@ contract InitializeOFTTest is Test, SetupOFT {
         implementationOFT = new ImplementationOFT(lzEndpoint);
 
         vm.startPrank(owner);
+
         vm.expectRevert(ImplementationOFT.ZeroAddress.selector);
-        implementationOFT.initialize(
-            name,
-            symbol,
-            users,
-            amounts,
-            owner,
-            lzEndpoint
-        );
+        implementationOFT.initialize(name, symbol, users, amounts, owner);
     }
 
     function test_RevertIf_NotOwner() public {
@@ -93,6 +62,7 @@ contract InitializeOFTTest is Test, SetupOFT {
 
         // not owner
         vm.startPrank(userB);
+
         vm.expectRevert();
         implementationOFT.setPeers(
             10,

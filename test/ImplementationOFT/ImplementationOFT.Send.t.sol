@@ -22,7 +22,7 @@ import "forge-std/console.sol";
 import {Test} from "forge-std/Test.sol";
 
 import {ImplementationOFT} from "src/ImplementationOFT.sol";
-import {SetupOFT} from "test/ImplementationOFT/_.ImplementationOFT.Setup.sol";
+import {SetupOFT} from "test/_.ExpandableSystem.Setup.sol";
 
 contract ExpanderTest is TestHelperOz5, SetupOFT {
     using OptionsBuilder for bytes;
@@ -41,13 +41,13 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
         assertEq(ImplementationOFT(proxy2).balanceOf(owner), amounts[0]);
 
         vm.startPrank(owner);
+
         ImplementationOFT(proxy1).sendTokens{value: _value}(
             bEid,
             owner,
             tokensToSend
         );
 
-        vm.startPrank(owner);
         verifyPackets(bEid, bytes32(uint256(uint160(proxy2))));
 
         assertEq(
@@ -98,7 +98,7 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
     }
 
     function test_RevertIf_NotEnoughValue() public {
-        uint _value = 0 ether;
+        _value = 0 ether;
 
         vm.startPrank(owner);
 

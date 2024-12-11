@@ -47,14 +47,12 @@ contract ImplementationOFT is OFTUpgradeable {
         string memory _symbol,
         address[] memory users,
         uint[] memory amounts,
-        address _delegate,
-        address _lzEndpoint
+        address _delegate
     ) external initializer {
         require(users.length == amounts.length, WrongAllocationParams());
+
         __Ownable_init(_delegate);
         __ERC20_init(_name, _symbol);
-
-        lzEndpoint = _lzEndpoint;
 
         for (uint i = 0; i < users.length; i++) {
             require(users[i] != address(0), ZeroAddress());
@@ -81,9 +79,12 @@ contract ImplementationOFT is OFTUpgradeable {
         );
         require(amount > 0, ZeroAmount());
 
+        uint128 _gas = 200000;
+        uint128 _value = 0;
+
         bytes memory options = OptionsBuilder
             .newOptions()
-            .addExecutorLzReceiveOption(250000, 0);
+            .addExecutorLzReceiveOption(_gas, _value);
 
         SendParam memory sendParam = SendParam(
             dstEid,
@@ -182,5 +183,13 @@ contract ImplementationOFT is OFTUpgradeable {
         ) = _buildMsgAndOptions(sendParam, amountReceivedLD);
 
         return (_message, _extraOptions);
+    }
+
+    function tokenInfo()
+        public
+        view
+        returns (string memory, string memory, address)
+    {
+        return (name(), symbol(), owner());
     }
 }
