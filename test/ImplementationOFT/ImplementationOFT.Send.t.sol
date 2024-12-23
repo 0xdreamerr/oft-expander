@@ -38,9 +38,11 @@ import "forge-std/console.sol";
 import {Test} from "forge-std/Test.sol";
 
 import {ImplementationOFT} from "src/ImplementationOFT.sol";
-import {SetupOFT} from "test/_.ExpandableSystem.Setup.sol";
+import {SetupExpandableSystem} from "test/_.ExpandableSystem.Setup.sol";
+import {IERC20Errors} from
+    "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
-contract ExpanderTest is TestHelperOz5, SetupOFT {
+contract TokenSendTest is TestHelperOz5, SetupExpandableSystem {
     using OptionsBuilder for bytes;
 
     uint256 tokensToSend = 100 ether;
@@ -84,9 +86,11 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
         vm.startPrank(owner);
 
         vm.expectRevert(
-            abi.encodeWithSignature(
-                "InsufficientBalance(uint256)",
-                ImplementationOFT(proxy1).balanceOf(owner)
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientBalance.selector,
+                owner,
+                ImplementationOFT(proxy1).balanceOf(owner),
+                tokensToSend
             )
         );
 
@@ -118,6 +122,18 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
 
         ImplementationOFT(proxy1).sendTokens{value: _value}(
             bEid, owner, tokensToSend
+        );
+    }
+
+    function test_RevertIf_ZeroAddress() public {
+        address to = address(0);
+
+        vm.startPrank(owner);
+
+        vm.expectRevert(abi.encodeWithSignature("ZeroAddress()"));
+
+        ImplementationOFT(proxy1).sendTokens{value: _value}(
+            bEid, to, tokensToSend
         );
     }
 }

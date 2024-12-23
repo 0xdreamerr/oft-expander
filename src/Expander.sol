@@ -23,6 +23,7 @@ contract Expander is OApp {
 
     address public immutable IMPLEMENTATION;
     address public lzEndpoint;
+    uint128 public gasLimit;
 
     /* ======== ERRORS ======== */
 
@@ -43,9 +44,14 @@ contract Expander is OApp {
     {
         IMPLEMENTATION = _implementation;
         lzEndpoint = _endpoint;
+        gasLimit = 300000; // default gas limit value
     }
 
     /* ======== EXTERNAL/PUBLIC ======== */
+
+    function setGasLimit(uint128 _gasLimit) public onlyOwner {
+        gasLimit = _gasLimit;
+    }
 
     function createOFT(
         string memory name,
@@ -68,6 +74,8 @@ contract Expander is OApp {
     function expandToken(address oft, uint32 _dstEid) public payable {
         require(_dstEid != 0 && oft != address(0), ZeroParameter());
 
+        //setPeers(_dstEid, bytes32(uint256(uint160(oft))));
+
         (string memory _name, string memory _symbol, address _owner) =
             ImplementationOFT(oft).tokenInfo();
 
@@ -75,11 +83,10 @@ contract Expander is OApp {
 
         bytes memory _data = abi.encode(_name, _symbol, _owner);
 
-        uint128 _gas = 200000;
         uint128 _value = 0;
 
-        bytes memory _options =
-            OptionsBuilder.newOptions().addExecutorLzReceiveOption(_gas, _value);
+        bytes memory _options = OptionsBuilder.newOptions()
+            .addExecutorLzReceiveOption(gasLimit, _value);
 
         MessagingFee memory fee = _quote(_dstEid, _data, _options, false);
 

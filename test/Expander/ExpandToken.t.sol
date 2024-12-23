@@ -3,13 +3,13 @@ pragma solidity ^0.8.27;
 
 import {Expander} from "src/Expander.sol";
 import {ImplementationOFT} from "src/ImplementationOFT.sol";
-import {SetupOFT} from "../_.ExpandableSystem.Setup.sol";
+import {SetupExpandableSystem} from "../_.ExpandableSystem.Setup.sol";
 
 import {OAppSender} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
 
-contract ExpandToken is Test, SetupOFT {
+contract ExpandToken is Test, SetupExpandableSystem {
     uint256 _value;
 
     function setUp() public override {
@@ -26,7 +26,6 @@ contract ExpandToken is Test, SetupOFT {
     }
 
     function test_expandToOtherChain() public {
-        //@audit magic address, from which event it is emitted?
         address createdProxy = 0xCEA06Be09f0BAf0924c03d9839Dd28c7F1Da1736; // taken from event
 
         vm.startPrank(owner);
@@ -34,12 +33,6 @@ contract ExpandToken is Test, SetupOFT {
         expander1.expandToken{value: _value}(proxy1, bEid); // emit ProxyCreated(proxy: 0xCEA06Be09f0BAf0924c03d9839Dd28c7F1Da1736)
         verifyPackets(bEid, address(expander2));
 
-        //@audit SHOULD assert that `lzEndpoint` is actual lzEndpoint address instead of address(0)
-        // assertNotEq(
-        //     ImplementationOFT(createdProxy).lzEndpoint(),
-        //     address(0),
-        //     "lzEndpoint MUST be set in MinimalProxy after expandToken()"
-        // );
         assertEq(ImplementationOFT(createdProxy).totalSupply(), 0);
         assertEq(ImplementationOFT(createdProxy).owner(), owner);
         assertEq(ImplementationOFT(createdProxy).name(), name);

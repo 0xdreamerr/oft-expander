@@ -2,13 +2,13 @@
 pragma solidity ^0.8.27;
 
 import {ImplementationOFT} from "src/ImplementationOFT.sol";
-import {SetupOFT} from "../_.ExpandableSystem.Setup.sol";
+import {SetupExpandableSystem} from "../_.ExpandableSystem.Setup.sol";
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
 import {Initializable} from
     "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract InitializeOFTTest is Test, SetupOFT {
+contract InitializeOFTTest is Test, SetupExpandableSystem {
     function setUp() public override {
         setUpForBasicTests();
     }
@@ -73,8 +73,6 @@ contract InitializeOFTTest is Test, SetupOFT {
         vm.startPrank(userB);
 
         vm.expectRevert();
-        implementationOFT.setPeers(
-            10, bytes32(uint256(uint160(address(userB))))
-        );
+        implementationOFT.setPeer(10, bytes32(uint256(uint160(address(userB)))));
     }
 }

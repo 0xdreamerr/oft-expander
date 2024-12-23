@@ -3,11 +3,11 @@ pragma solidity ^0.8.27;
 
 import {Expander} from "src/Expander.sol";
 import {ImplementationOFT} from "src/ImplementationOFT.sol";
-import {SetupOFT} from "../_.ExpandableSystem.Setup.sol";
+import {SetupExpandableSystem} from "../_.ExpandableSystem.Setup.sol";
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
 
-contract ExpanderTest is Test, SetupOFT {
+contract ExpanderTest is Test, SetupExpandableSystem {
     function setUp() public override {
         setUpForBasicTests();
         setUpEndpoints(2, LibraryType.UltraLightNode);
@@ -27,13 +27,6 @@ contract ExpanderTest is Test, SetupOFT {
         assert(proxy != address(0));
         assertEq(ImplementationOFT(proxy).balanceOf(userB), 400);
         assertEq(ImplementationOFT(proxy).balanceOf(owner), 100);
-
-        //@audit `lzEndpoint` is not set in `ImplementationOFT`
-        // assertEq(
-        //     ImplementationOFT(proxy).lzEndpoint(),
-        //     address(endpoints[aEid]),
-        //     "lzEndpoint MUST be set in MinimalProxy after initialize()"
-        // );
     }
 
     function test_createProxiesWithDifferentOwners() public {
@@ -49,11 +42,11 @@ contract ExpanderTest is Test, SetupOFT {
         address proxy2 = expander.createOFT(name, symbol, users, amounts, userB);
 
         // owner
-        ImplementationOFT(proxy).setPeers(10, bytes32(uint256(uint160(userB))));
+        ImplementationOFT(proxy).setPeer(10, bytes32(uint256(uint160(userB))));
 
         // not owner
         vm.expectRevert();
-        ImplementationOFT(proxy2).setPeers(10, bytes32(uint256(uint160(userB))));
+        ImplementationOFT(proxy2).setPeer(10, bytes32(uint256(uint160(userB))));
     }
 
     function test_RevertIf_diffSizeArrays() public {

@@ -35,6 +35,7 @@ contract ImplementationOFT is OFTUpgradeable {
     using OFTMsgCodec for bytes32;
 
     address public lzEndpoint;
+    uint128 public gasLimit;
 
     /* ======== ERRORS ======== */
 
@@ -48,12 +49,12 @@ contract ImplementationOFT is OFTUpgradeable {
     event TokenCreated(address OFT);
     event TokensAllocated();
     event TokenReceived(bytes32 guid, uint256 srcEid, uint256 amount);
+    event PeersAlreadySetted(uint32 chainId, bytes32 token);
 
     /* ======== CONSTRUCTOR AND INIT ======== */
 
     constructor(address _lzEndpoint) OFTUpgradeable(_lzEndpoint) {}
 
-    //@audit `initialize()` does not set `lzEndpoint`, bridging of deployed tokens is not possible
     function initialize(
         string memory _name,
         string memory _symbol,
@@ -71,35 +72,29 @@ contract ImplementationOFT is OFTUpgradeable {
             _mint(users[i], amounts[i]);
         }
 
+        gasLimit = 200000; // default gas limit value
+
         emit TokensAllocated();
     }
 
     /* ======== EXTERNAL/PUBLIC ======== */
 
-    //@audit useless function
-    function setPeers(uint32 chainId, bytes32 targetAddress) public {
-        setPeer(chainId, targetAddress);
+    function setGasLimit(uint128 _gasLimit) public onlyOwner {
+        gasLimit = _gasLimit;
     }
 
-    //@audit `to` is not validated for zero address
     function sendTokens(uint32 dstEid, address to, uint256 amount)
         external
         payable
         returns (OFTReceipt memory)
     {
-        //@audit `amount` require for `balanceOf` is implemented in _debit()
-        require(
-            balanceOf(msg.sender) >= amount,
-            InsufficientBalance(balanceOf(msg.sender))
-        );
         require(amount > 0, ZeroAmount());
+        require(to != address(0), ZeroAddress());
 
-        //@audit `_gas` is better to be configurable from outside
-        uint128 _gas = 200000;
         uint128 _value = 0;
 
-        bytes memory options =
-            OptionsBuilder.newOptions().addExecutorLzReceiveOption(_gas, _value);
+        bytes memory options = OptionsBuilder.newOptions()
+            .addExecutorLzReceiveOption(gasLimit, _value);
 
         SendParam memory sendParam = SendParam(
             dstEid,
@@ -111,10 +106,6 @@ contract ImplementationOFT is OFTUpgradeable {
             ""
         );
 
-        //@audit `quoteSend()` is better to be placed near usage place - `_lzSend()`
-        MessagingFee memory fee =
-            OFTCoreUpgradeable(this).quoteSend(sendParam, false);
-
         (uint256 amountSentLD, uint256 amountReceivedLD) = _debit(
             msg.sender,
             sendParam.amountLD,
@@ -124,6 +115,9 @@ contract ImplementationOFT is OFTUpgradeable {
 
         (bytes memory message, bytes memory extraOptions) =
             this.buildMsg(sendParam, amountReceivedLD);
+
+        MessagingFee memory fee =
+            OFTCoreUpgradeable(this).quoteSend(sendParam, false);
 
         // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
         MessagingReceipt memory msgReceipt =
@@ -146,7 +140,6 @@ contract ImplementationOFT is OFTUpgradeable {
 
     /* ======== INTERNAL ======== */
 
-    //@audit unused function
     function _payNative(uint256 _nativeFee)
         internal
         override

@@ -8,8 +8,7 @@ import {TestHelperOz5} from
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
 
-//@audit `SetupOFT` is not a good name for this contract, it also sets up expanders and basic values
-contract SetupOFT is Test, TestHelperOz5 {
+contract SetupExpandableSystem is Test, TestHelperOz5 {
     ImplementationOFT internal implementationOFT;
 
     Expander internal expander1;
@@ -43,7 +42,6 @@ contract SetupOFT is Test, TestHelperOz5 {
         name = "Test";
         symbol = "Test";
         delegate = owner;
-        //@audit lzEndpoint = address(0) - `endpoints` is not set in `setUpForBasicTests()`
         lzEndpoint = endpoints[aEid];
         amounts = [100, 400];
         users = [owner, userB];
@@ -52,9 +50,6 @@ contract SetupOFT is Test, TestHelperOz5 {
     function setUpForLzSend() public virtual {
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
-
-        console.log(endpoints[aEid]);
-        console.log(endpoints[bEid]);
 
         owner = address(0x1);
         userB = address(0x2);
@@ -84,7 +79,6 @@ contract SetupOFT is Test, TestHelperOz5 {
         expander1 = new Expander(address(mainOFT), address(endpoints[aEid]));
         expander2 = new Expander(address(cloneOFT), address(endpoints[bEid]));
 
-        //@audit two same tokens are created, that are not actually interconnected?
         proxy1 = expander1.createOFT(name, symbol, users, amounts, owner);
         proxy2 = expander2.createOFT(name, symbol, users, amounts, owner);
 
