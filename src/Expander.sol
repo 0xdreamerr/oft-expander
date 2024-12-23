@@ -2,10 +2,15 @@
 pragma solidity ^0.8.27;
 
 /* ====== EXTERNAL IMPORTS ====== */
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import {OApp, Origin, MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {
+    OApp,
+    Origin,
+    MessagingFee
+} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {OptionsBuilder} from "lib/layerzero-v2/packages/layerzero-v2/evm/oapp/contracts/oapp/libs/OptionsBuilder.sol";
+import {OptionsBuilder} from
+    "lib/layerzero-v2/packages/layerzero-v2/evm/oapp/contracts/oapp/libs/OptionsBuilder.sol";
 
 /* ====== INTERFACES IMPORTS ====== */
 
@@ -32,7 +37,10 @@ contract Expander is OApp {
 
     /* ======== CONSTRUCTOR AND INIT ======== */
 
-    constructor(address _implementation, address _endpoint) OApp(_endpoint, msg.sender) Ownable(msg.sender) {
+    constructor(address _implementation, address _endpoint)
+        OApp(_endpoint, msg.sender)
+        Ownable(msg.sender)
+    {
         IMPLEMENTATION = _implementation;
         lzEndpoint = _endpoint;
     }
@@ -48,7 +56,9 @@ contract Expander is OApp {
     ) external returns (address) {
         address proxy = Clones.clone(IMPLEMENTATION);
 
-        ImplementationOFT(proxy).initialize(name, symbol, users, amounts, _owner);
+        ImplementationOFT(proxy).initialize(
+            name, symbol, users, amounts, _owner
+        );
 
         emit ProxyCreated(proxy);
 
@@ -58,7 +68,8 @@ contract Expander is OApp {
     function expandToken(address oft, uint32 _dstEid) public payable {
         require(_dstEid != 0 && oft != address(0), ZeroParameter());
 
-        (string memory _name, string memory _symbol, address _owner) = ImplementationOFT(oft).tokenInfo();
+        (string memory _name, string memory _symbol, address _owner) =
+            ImplementationOFT(oft).tokenInfo();
 
         require(msg.sender == _owner, NotOwner());
 
@@ -67,7 +78,8 @@ contract Expander is OApp {
         uint128 _gas = 200000;
         uint128 _value = 0;
 
-        bytes memory _options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(_gas, _value);
+        bytes memory _options =
+            OptionsBuilder.newOptions().addExecutorLzReceiveOption(_gas, _value);
 
         MessagingFee memory fee = _quote(_dstEid, _data, _options, false);
 
@@ -76,11 +88,15 @@ contract Expander is OApp {
 
     /* ======== INTERNAL ======== */
 
-    function _lzReceive(Origin calldata, bytes32, bytes calldata _message, address, /*_executor*/ bytes calldata)
-        internal
-        override
-    {
-        (string memory name, string memory symbol, address owner) = abi.decode(_message, (string, string, address));
+    function _lzReceive(
+        Origin calldata,
+        bytes32,
+        bytes calldata _message,
+        address, /*_executor*/
+        bytes calldata
+    ) internal override {
+        (string memory name, string memory symbol, address owner) =
+            abi.decode(_message, (string, string, address));
 
         // no mint
         address[] memory emptyUsers;
@@ -101,7 +117,11 @@ contract Expander is OApp {
         return peers[_eid] == _peer;
     }
 
-    function _payNative(uint256 _nativeFee) internal override returns (uint256 nativeFee) {
+    function _payNative(uint256 _nativeFee)
+        internal
+        override
+        returns (uint256 nativeFee)
+    {
         if (msg.value < _nativeFee) revert NotEnoughNative(msg.value);
         return _nativeFee;
     }

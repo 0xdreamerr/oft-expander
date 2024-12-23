@@ -5,7 +5,8 @@ import {ImplementationOFT} from "src/ImplementationOFT.sol";
 import {SetupOFT} from "../_.ExpandableSystem.Setup.sol";
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
-import {Initializable} from "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from
+    "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract InitializeOFTTest is Test, SetupOFT {
     function setUp() public override {
@@ -21,6 +22,14 @@ contract InitializeOFTTest is Test, SetupOFT {
 
         assertEq(implementationOFT.balanceOf(userB), 400);
         assertEq(implementationOFT.balanceOf(owner), 100);
+    }
+
+    function test_SetsLzEndpoint() public {
+        vm.startPrank(owner);
+
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+
+        implementationOFT.initialize(name, symbol, users, amounts, owner);
     }
 
     function test_RevertIf_SecondInitializing() public {
@@ -64,6 +73,8 @@ contract InitializeOFTTest is Test, SetupOFT {
         vm.startPrank(userB);
 
         vm.expectRevert();
-        implementationOFT.setPeers(10, bytes32(uint256(uint160(address(userB)))));
+        implementationOFT.setPeers(
+            10, bytes32(uint256(uint160(address(userB))))
+        );
     }
 }

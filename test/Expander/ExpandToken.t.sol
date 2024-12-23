@@ -26,6 +26,7 @@ contract ExpandToken is Test, SetupOFT {
     }
 
     function test_expandToOtherChain() public {
+        //@audit magic address, from which event it is emitted?
         address createdProxy = 0xCEA06Be09f0BAf0924c03d9839Dd28c7F1Da1736; // taken from event
 
         vm.startPrank(owner);
@@ -33,6 +34,12 @@ contract ExpandToken is Test, SetupOFT {
         expander1.expandToken{value: _value}(proxy1, bEid); // emit ProxyCreated(proxy: 0xCEA06Be09f0BAf0924c03d9839Dd28c7F1Da1736)
         verifyPackets(bEid, address(expander2));
 
+        //@audit SHOULD assert that `lzEndpoint` is actual lzEndpoint address instead of address(0)
+        // assertNotEq(
+        //     ImplementationOFT(createdProxy).lzEndpoint(),
+        //     address(0),
+        //     "lzEndpoint MUST be set in MinimalProxy after expandToken()"
+        // );
         assertEq(ImplementationOFT(createdProxy).totalSupply(), 0);
         assertEq(ImplementationOFT(createdProxy).owner(), owner);
         assertEq(ImplementationOFT(createdProxy).name(), name);
@@ -63,7 +70,9 @@ contract ExpandToken is Test, SetupOFT {
     function test_RevertIf_NotEnoughValue() public {
         _value = 10;
 
-        vm.expectRevert(abi.encodeWithSignature("NotEnoughNative(uint256)", _value));
+        vm.expectRevert(
+            abi.encodeWithSignature("NotEnoughNative(uint256)", _value)
+        );
         expander1.expandToken{value: _value}(proxy1, bEid);
     }
 }

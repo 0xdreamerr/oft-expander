@@ -27,6 +27,13 @@ contract ExpanderTest is Test, SetupOFT {
         assert(proxy != address(0));
         assertEq(ImplementationOFT(proxy).balanceOf(userB), 400);
         assertEq(ImplementationOFT(proxy).balanceOf(owner), 100);
+
+        //@audit `lzEndpoint` is not set in `ImplementationOFT`
+        // assertEq(
+        //     ImplementationOFT(proxy).lzEndpoint(),
+        //     address(endpoints[aEid]),
+        //     "lzEndpoint MUST be set in MinimalProxy after initialize()"
+        // );
     }
 
     function test_createProxiesWithDifferentOwners() public {
