@@ -1,2 +1,12 @@
-node_modules
+# Ignore documentation files from solidity-docgen and others
+*.md
+
+# Ignore node_modules and dependencies
 lib
+node_modules
+dependencies
+
+# Ignore lock files
+package-lock.json
+yarn-lock.json
+pnpm-lock.yaml

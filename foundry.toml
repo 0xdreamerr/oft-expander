@@ -1,14 +1,14 @@
 [profile.default]
-src = "src"
-out = "out"
-libs = ["lib", "node_modules"]
+  libs = ["lib", "node_modules"]
+  out = "out"
+  src = "src"
 
-evm_version = "shanghai" # simulation may be false positive on bsc (PUSH0 opcode support)
+  evm_version = "shanghai" # simulation may be false positive on bsc (PUSH0 opcode support)
 
-optimizer=true
-optimizer_runs=1000000
+  optimizer = true
+  optimizer_runs = 1000000
 
-remappings = [
+  remappings = [
     "forge-std/=lib/forge-std/src/",
     "@openzeppelin/=node_modules/@openzeppelin/",
     "@layerzerolabs/oapp-evm-upgradeable=lib/devtools/packages/oapp-evm-upgradeable",
@@ -20,37 +20,40 @@ remappings = [
     "solidity-bytes-utils/contracts/=node_modules/solidity-bytes-utils/contracts/",
     "@layerzerolabs/lz-evm-messagelib-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/messagelib/",
     "@layerzerolabs/lz-evm-v1-0.7=node_modules/@layerzerolabs/lz-evm-v1-0.7",
-    "@layerzerolabs/create3-factory=node_modules/@layerzerolabs/create3-factory/"
-]
+    "@layerzerolabs/create3-factory=node_modules/@layerzerolabs/create3-factory/",
+  ]
 
-fs_permissions = [
-    { access = "read-write", path = "./"},
-    { access = "none", path = ".env"} # TODO: check if it overrides previous rule
-]
+  fs_permissions = [
+    { access = "read-write", path = "./" },
+    { access = "none", path = ".env" },     # TODO: check if it overrides previous rule
+  ]
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+  # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[fmt]
+  line_length = 80
 
 [rpc_endpoints]
-# Name "ethereum" breaks foundry configuration!
-mainnet = "${ETHEREUM_RPC}"
-arbitrum = "${ARBITRUM_RPC}"
-polygon = "${POLYGON_RPC}"
-optimism = "${OPTIMISM_RPC}"
-base = "${BASE_RPC}"
-bsc = "${BSC_RPC}"
-avalanche = "${AVALANCHE_RPC}"
-mantle = "${MANTLE_RPC}"
-metis = "${METIS_RPC}"
-sei = "${SEI_RPC}"
+  # Name "ethereum" breaks foundry configuration!
+  arbitrum = "${ARBITRUM_RPC}"
+  avalanche = "${AVALANCHE_RPC}"
+  base = "${BASE_RPC}"
+  bsc = "${BSC_RPC}"
+  mainnet = "${ETHEREUM_RPC}"
+  mantle = "${MANTLE_RPC}"
+  metis = "${METIS_RPC}"
+  optimism = "${OPTIMISM_RPC}"
+  polygon = "${POLYGON_RPC}"
+  sei = "${SEI_RPC}"
 
 [etherscan]
-mainnet = { key = "${ETHEREUM_TOKEN}", chain = 1 }
-arbitrum = { key = "${ARBITRUM_TOKEN}", chain = 42161 }
-polygon = { key = "${POLYGON_TOKEN}", chain = 137 }
-optimism = { key = "${OPTIMISM_TOKEN}", chain = 10 }
-base = { key = "${BASE_TOKEN}", chain = 8453 }
-bsc = { key = "${BSC_TOKEN}", chain = 56 }
-avalanche = { key = "avascan", chain = 43114, url = "https://api.avascan.info/v2/network/mainnet/evm/43114/etherscan"}
-mantle = { key = "verifyContract", chain = 5000, url = "https://api.routescan.io/v2/network/mainnet/evm/5000/etherscan"}
-metis = { key = "verifyContract", chain = 1088, url = "https://api.routescan.io/v2/network/mainnet/evm/1088/etherscan" }
-sei = { key = "verifyContract", chain = 1329, url = "https://seitrace.com/pacific-1/api" }
+  arbitrum = { key = "${ARBITRUM_TOKEN}", chain = 42161 }
+  avalanche = { key = "avascan", chain = 43114, url = "https://api.avascan.info/v2/network/mainnet/evm/43114/etherscan" }
+  base = { key = "${BASE_TOKEN}", chain = 8453 }
+  bsc = { key = "${BSC_TOKEN}", chain = 56 }
+  mainnet = { key = "${ETHEREUM_TOKEN}", chain = 1 }
+  mantle = { key = "verifyContract", chain = 5000, url = "https://api.routescan.io/v2/network/mainnet/evm/5000/etherscan" }
+  metis = { key = "verifyContract", chain = 1088, url = "https://api.routescan.io/v2/network/mainnet/evm/1088/etherscan" }
+  optimism = { key = "${OPTIMISM_TOKEN}", chain = 10 }
+  polygon = { key = "${POLYGON_TOKEN}", chain = 137 }
+  sei = { key = "verifyContract", chain = 1329, url = "https://seitrace.com/pacific-1/api" }
