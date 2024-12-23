@@ -1,2 +1,9 @@
+forge build
+
+forge fmt
+
 npm run prettier
+
+npm run lint:fix
+
 forge test
