@@ -59,19 +59,11 @@ contract SetupOFT is Test, TestHelperOz5 {
         amounts = [1000 ether, 4000 ether];
         users = [owner, userB];
 
-        mainOFT = ImplementationOFT(
-            _deployOApp(
-                type(ImplementationOFT).creationCode,
-                abi.encode(address(endpoints[aEid]))
-            )
-        );
+        mainOFT =
+            ImplementationOFT(_deployOApp(type(ImplementationOFT).creationCode, abi.encode(address(endpoints[aEid]))));
 
-        cloneOFT = ImplementationOFT(
-            _deployOApp(
-                type(ImplementationOFT).creationCode,
-                abi.encode(address(endpoints[bEid]))
-            )
-        );
+        cloneOFT =
+            ImplementationOFT(_deployOApp(type(ImplementationOFT).creationCode, abi.encode(address(endpoints[bEid]))));
 
         vm.startPrank(owner);
 
@@ -81,14 +73,8 @@ contract SetupOFT is Test, TestHelperOz5 {
         proxy1 = expander1.createOFT(name, symbol, users, amounts, owner);
         proxy2 = expander2.createOFT(name, symbol, users, amounts, owner);
 
-        ImplementationOFT(proxy1).setPeer(
-            bEid,
-            bytes32(uint256(uint160(address(proxy2))))
-        );
+        ImplementationOFT(proxy1).setPeer(bEid, bytes32(uint256(uint160(address(proxy2)))));
 
-        ImplementationOFT(proxy2).setPeer(
-            aEid,
-            bytes32(uint256(uint160(address(proxy1))))
-        );
+        ImplementationOFT(proxy2).setPeer(aEid, bytes32(uint256(uint160(address(proxy1)))));
     }
 }

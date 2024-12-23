@@ -64,9 +64,6 @@ contract InitializeOFTTest is Test, SetupOFT {
         vm.startPrank(userB);
 
         vm.expectRevert();
-        implementationOFT.setPeers(
-            10,
-            bytes32(uint256(uint160(address(userB))))
-        );
+        implementationOFT.setPeers(10, bytes32(uint256(uint160(address(userB)))));
     }
 }

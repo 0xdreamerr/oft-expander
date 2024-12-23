@@ -39,23 +39,14 @@ contract ExpanderTest is Test, SetupOFT {
 
         address proxy = expander.createOFT(name, symbol, users, amounts, owner);
 
-        address proxy2 = expander.createOFT(
-            name,
-            symbol,
-            users,
-            amounts,
-            userB
-        );
+        address proxy2 = expander.createOFT(name, symbol, users, amounts, userB);
 
         // owner
         ImplementationOFT(proxy).setPeers(10, bytes32(uint256(uint160(userB))));
 
         // not owner
         vm.expectRevert();
-        ImplementationOFT(proxy2).setPeers(
-            10,
-            bytes32(uint256(uint160(userB)))
-        );
+        ImplementationOFT(proxy2).setPeers(10, bytes32(uint256(uint160(userB))));
     }
 
     function test_RevertIf_diffSizeArrays() public {

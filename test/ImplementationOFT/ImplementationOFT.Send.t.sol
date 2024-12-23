@@ -2,9 +2,11 @@
 pragma solidity ^0.8.27;
 
 // OApp imports
-import {IOAppOptionsType3, EnforcedOptionParam} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {
+    IOAppOptionsType3, EnforcedOptionParam
+} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
-import {OFTMock} from "devtools/examples/oft-adapter/test/mocks/OFTMock.sol";
+import {OFTMock} from "lib/devtools/packages/oft-evm/test/mocks/OFTMock.sol";
 
 // OFT imports
 import {IOFT, SendParam, OFTReceipt} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
@@ -27,8 +29,8 @@ import {SetupOFT} from "test/_.ExpandableSystem.Setup.sol";
 contract ExpanderTest is TestHelperOz5, SetupOFT {
     using OptionsBuilder for bytes;
 
-    uint tokensToSend = 100 ether;
-    uint _value = 1 ether;
+    uint256 tokensToSend = 100 ether;
+    uint256 _value = 1 ether;
 
     function setUp() public override {
         setUpForLzSend();
@@ -42,22 +44,12 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
 
         vm.startPrank(owner);
 
-        ImplementationOFT(proxy1).sendTokens{value: _value}(
-            bEid,
-            owner,
-            tokensToSend
-        );
+        ImplementationOFT(proxy1).sendTokens{value: _value}(bEid, owner, tokensToSend);
 
         verifyPackets(bEid, bytes32(uint256(uint160(proxy2))));
 
-        assertEq(
-            ImplementationOFT(proxy1).balanceOf(owner),
-            amounts[0] - tokensToSend
-        );
-        assertEq(
-            ImplementationOFT(proxy2).balanceOf(owner),
-            amounts[0] + tokensToSend
-        );
+        assertEq(ImplementationOFT(proxy1).balanceOf(owner), amounts[0] - tokensToSend);
+        assertEq(ImplementationOFT(proxy2).balanceOf(owner), amounts[0] + tokensToSend);
     }
 
     function test_RevertIf_InsufficientBalance() public {
@@ -70,17 +62,10 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
         vm.startPrank(owner);
 
         vm.expectRevert(
-            abi.encodeWithSignature(
-                "InsufficientBalance(uint256)",
-                ImplementationOFT(proxy1).balanceOf(owner)
-            )
+            abi.encodeWithSignature("InsufficientBalance(uint256)", ImplementationOFT(proxy1).balanceOf(owner))
         );
 
-        ImplementationOFT(proxy1).sendTokens{value: _value}(
-            bEid,
-            owner,
-            tokensToSend
-        );
+        ImplementationOFT(proxy1).sendTokens{value: _value}(bEid, owner, tokensToSend);
     }
 
     function test_RevertIf_ZeroAmount() public {
@@ -90,11 +75,7 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
 
         vm.expectRevert(ImplementationOFT.ZeroAmount.selector);
 
-        ImplementationOFT(proxy1).sendTokens{value: _value}(
-            bEid,
-            owner,
-            tokensToSend
-        );
+        ImplementationOFT(proxy1).sendTokens{value: _value}(bEid, owner, tokensToSend);
     }
 
     function test_RevertIf_NotEnoughValue() public {
@@ -102,14 +83,8 @@ contract ExpanderTest is TestHelperOz5, SetupOFT {
 
         vm.startPrank(owner);
 
-        vm.expectRevert(
-            abi.encodeWithSignature("NotEnoughNative(uint256)", _value)
-        );
+        vm.expectRevert(abi.encodeWithSignature("NotEnoughNative(uint256)", _value));
 
-        ImplementationOFT(proxy1).sendTokens{value: _value}(
-            bEid,
-            owner,
-            tokensToSend
-        );
+        ImplementationOFT(proxy1).sendTokens{value: _value}(bEid, owner, tokensToSend);
     }
 }

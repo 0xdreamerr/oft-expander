@@ -16,7 +16,7 @@ contract Expander is OApp {
     /* ======== STATE ======== */
     using OptionsBuilder for bytes;
 
-    address public immutable implementation;
+    address public immutable IMPLEMENTATION;
     address public lzEndpoint;
 
     /* ======== ERRORS ======== */
@@ -32,11 +32,8 @@ contract Expander is OApp {
 
     /* ======== CONSTRUCTOR AND INIT ======== */
 
-    constructor(
-        address _implementation,
-        address _endpoint
-    ) OApp(_endpoint, msg.sender) Ownable(msg.sender) {
-        implementation = _implementation;
+    constructor(address _implementation, address _endpoint) OApp(_endpoint, msg.sender) Ownable(msg.sender) {
+        IMPLEMENTATION = _implementation;
         lzEndpoint = _endpoint;
     }
 
@@ -49,15 +46,9 @@ contract Expander is OApp {
         uint256[] memory amounts,
         address _owner
     ) external returns (address) {
-        address proxy = Clones.clone(implementation);
+        address proxy = Clones.clone(IMPLEMENTATION);
 
-        ImplementationOFT(proxy).initialize(
-            name,
-            symbol,
-            users,
-            amounts,
-            _owner
-        );
+        ImplementationOFT(proxy).initialize(name, symbol, users, amounts, _owner);
 
         emit ProxyCreated(proxy);
 
@@ -67,11 +58,7 @@ contract Expander is OApp {
     function expandToken(address oft, uint32 _dstEid) public payable {
         require(_dstEid != 0 && oft != address(0), ZeroParameter());
 
-        (
-            string memory _name,
-            string memory _symbol,
-            address _owner
-        ) = ImplementationOFT(oft).tokenInfo();
+        (string memory _name, string memory _symbol, address _owner) = ImplementationOFT(oft).tokenInfo();
 
         require(msg.sender == _owner, NotOwner());
 
@@ -80,9 +67,7 @@ contract Expander is OApp {
         uint128 _gas = 200000;
         uint128 _value = 0;
 
-        bytes memory _options = OptionsBuilder
-            .newOptions()
-            .addExecutorLzReceiveOption(_gas, _value);
+        bytes memory _options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(_gas, _value);
 
         MessagingFee memory fee = _quote(_dstEid, _data, _options, false);
 
@@ -91,21 +76,15 @@ contract Expander is OApp {
 
     /* ======== INTERNAL ======== */
 
-    function _lzReceive(
-        Origin calldata,
-        bytes32,
-        bytes calldata _message,
-        address /*_executor*/,
-        bytes calldata
-    ) internal override {
-        (string memory name, string memory symbol, address owner) = abi.decode(
-            _message,
-            (string, string, address)
-        );
+    function _lzReceive(Origin calldata, bytes32, bytes calldata _message, address, /*_executor*/ bytes calldata)
+        internal
+        override
+    {
+        (string memory name, string memory symbol, address owner) = abi.decode(_message, (string, string, address));
 
         // no mint
         address[] memory emptyUsers;
-        uint[] memory emptyAmounts;
+        uint256[] memory emptyAmounts;
 
         this.createOFT(name, symbol, emptyUsers, emptyAmounts, owner);
     }
@@ -122,9 +101,7 @@ contract Expander is OApp {
         return peers[_eid] == _peer;
     }
 
-    function _payNative(
-        uint256 _nativeFee
-    ) internal override returns (uint256 nativeFee) {
+    function _payNative(uint256 _nativeFee) internal override returns (uint256 nativeFee) {
         if (msg.value < _nativeFee) revert NotEnoughNative(msg.value);
         return _nativeFee;
     }

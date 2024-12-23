@@ -9,8 +9,8 @@ import {OAppSender} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol"
 import {Test} from "forge-std/Test.sol";
 import {Script, console} from "forge-std/Script.sol";
 
-contract ExpandTokenTest is Test, SetupOFT {
-    uint _value;
+contract ExpandToken is Test, SetupOFT {
+    uint256 _value;
 
     function setUp() public override {
         setUpForLzSend();
@@ -63,9 +63,7 @@ contract ExpandTokenTest is Test, SetupOFT {
     function test_RevertIf_NotEnoughValue() public {
         _value = 10;
 
-        vm.expectRevert(
-            abi.encodeWithSignature("NotEnoughNative(uint256)", _value)
-        );
+        vm.expectRevert(abi.encodeWithSignature("NotEnoughNative(uint256)", _value));
         expander1.expandToken{value: _value}(proxy1, bEid);
     }
 }
