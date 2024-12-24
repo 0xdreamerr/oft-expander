@@ -90,4 +90,32 @@ contract ExpanderTest is Test, SetupExpandableSystem {
         vm.expectRevert(Expander.SymbolNameTooLong.selector);
         expander.createOFT(name, symbol, users, amounts, owner);
     }
+
+    function test_setGasLimit() public {
+        uint128 newGasLimit = 150000;
+
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+        address oft = implementationOFT.token();
+
+        Expander expander = new Expander(oft, address(endpoints[bEid]), owner);
+
+        address proxy = expander.createOFT(name, symbol, users, amounts, owner);
+
+        uint256 defaultGas = ImplementationOFT(proxy).gasLimit();
+
+        vm.startPrank(owner);
+        ImplementationOFT(proxy).setGasLimit(newGasLimit);
+
+        uint256 changedGas = ImplementationOFT(proxy).gasLimit();
+
+        assertNotEq(defaultGas, changedGas);
+
+        defaultGas = expander.gasLimit();
+
+        Expander(expander).setGasLimit(newGasLimit);
+
+        changedGas = expander.gasLimit();
+
+        assertNotEq(defaultGas, changedGas);
+    }
 }
