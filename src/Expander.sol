@@ -30,6 +30,7 @@ contract Expander is OApp {
     error PeersNotSetted();
     error ZeroParameter();
     error NotOwner();
+    error SymbolNameTooLong();
 
     /* ======== EVENTS ======== */
 
@@ -38,9 +39,9 @@ contract Expander is OApp {
 
     /* ======== CONSTRUCTOR AND INIT ======== */
 
-    constructor(address _implementation, address _endpoint)
-        OApp(_endpoint, msg.sender)
-        Ownable(msg.sender)
+    constructor(address _implementation, address _endpoint, address _owner)
+        OApp(_endpoint, _owner)
+        Ownable(_owner)
     {
         IMPLEMENTATION = _implementation;
         lzEndpoint = _endpoint;
@@ -58,13 +59,20 @@ contract Expander is OApp {
         string memory symbol,
         address[] memory users,
         uint256[] memory amounts,
-        address _owner
+        address owner
     ) external returns (address) {
-        address proxy = Clones.clone(IMPLEMENTATION);
+        require(bytes(symbol).length < 12, SymbolNameTooLong());
 
-        ImplementationOFT(proxy).initialize(
-            name, symbol, users, amounts, _owner
-        );
+        bytes memory salt = abi.encodePacked(symbol, owner);
+        bytes32 _salt;
+
+        assembly {
+            _salt := mload(add(salt, 32))
+        }
+
+        address proxy = Clones.cloneDeterministic(IMPLEMENTATION, _salt);
+
+        ImplementationOFT(proxy).initialize(name, symbol, users, amounts, owner);
 
         emit ProxyCreated(proxy);
 
@@ -74,7 +82,7 @@ contract Expander is OApp {
     function expandToken(address oft, uint32 _dstEid) public payable {
         require(_dstEid != 0 && oft != address(0), ZeroParameter());
 
-        //setPeers(_dstEid, bytes32(uint256(uint160(oft))));
+        setPeers(_dstEid, bytes32(uint256(uint160(address(this)))));
 
         (string memory _name, string memory _symbol, address _owner) =
             ImplementationOFT(oft).tokenInfo();
@@ -112,7 +120,7 @@ contract Expander is OApp {
         this.createOFT(name, symbol, emptyUsers, emptyAmounts, owner);
     }
 
-    function setPeers(uint32 _dstEid, bytes32 expander) public onlyOwner {
+    function setPeers(uint32 _dstEid, bytes32 expander) public {
         if (isPeer(_dstEid, expander)) {
             emit PeersAlreadySetted(_dstEid, expander);
         } else {
