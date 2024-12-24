@@ -19,53 +19,70 @@ contract ExpandToken is Test, SetupExpandableSystem {
         vm.deal(userB, 10 ether);
 
         vm.startPrank(owner);
-        expander1.setPeers(bEid, bytes32(uint256(uint160(address(expander2)))));
-        expander2.setPeers(aEid, bytes32(uint256(uint160(address(expander1)))));
+
+        vm.selectFork(arbFork);
+        Expander(expander1).setPeers(
+            bEid, bytes32(uint256(uint160(address(expander2))))
+        );
+        vm.selectFork(optFork);
+        Expander(expander2).setPeers(
+            aEid, bytes32(uint256(uint160(address(expander1))))
+        );
 
         _value = 1 ether;
     }
 
     function test_expandToOtherChain() public {
-        address createdProxy = 0xCEA06Be09f0BAf0924c03d9839Dd28c7F1Da1736; // taken from event
+        string memory _name = "Make MAAT great again";
+        string memory _symbol = "MAAT";
 
         vm.startPrank(owner);
+        vm.selectFork(arbFork);
 
-        expander1.expandToken{value: _value}(proxy1, bEid); // emit ProxyCreated(proxy: 0xCEA06Be09f0BAf0924c03d9839Dd28c7F1Da1736)
+        vm.deal(owner, 10 ether);
+
+        address newToken =
+            Expander(expander1).createOFT(_name, _symbol, users, amounts, owner);
+
+        Expander(expander1).expandToken{value: _value}(newToken, bEid);
+
+        vm.selectFork(optFork);
         verifyPackets(bEid, address(expander2));
 
-        assertEq(ImplementationOFT(createdProxy).totalSupply(), 0);
-        assertEq(ImplementationOFT(createdProxy).owner(), owner);
-        assertEq(ImplementationOFT(createdProxy).name(), name);
-        assertEq(ImplementationOFT(createdProxy).symbol(), symbol);
+        assertEq(ImplementationOFT(newToken).totalSupply(), 0); // deployed proxy have the same address
+        assertEq(ImplementationOFT(newToken).owner(), owner);
+        assertEq(ImplementationOFT(newToken).name(), _name);
+        assertEq(ImplementationOFT(newToken).symbol(), _symbol);
     }
 
     function test_RevertIf_ZeroEid() public {
         uint32 eId = 0;
 
         vm.expectRevert(Expander.ZeroParameter.selector);
-        expander1.expandToken{value: _value}(proxy1, eId);
+        Expander(expander1).expandToken{value: _value}(proxy1, eId);
     }
 
     function test_RevertIf_ZeroAddress() public {
         address proxy = address(0);
 
         vm.expectRevert(Expander.ZeroParameter.selector);
-        expander1.expandToken{value: _value}(proxy, aEid);
+        Expander(expander1).expandToken{value: _value}(proxy, aEid);
     }
 
     function test_RevertIf_NotOwner() public {
         vm.startPrank(userB);
 
         vm.expectRevert(Expander.NotOwner.selector);
-        expander1.expandToken{value: _value}(proxy1, aEid);
+        Expander(expander1).expandToken{value: _value}(proxy1, aEid);
     }
 
     function test_RevertIf_NotEnoughValue() public {
         _value = 10;
 
+        vm.selectFork(arbFork);
         vm.expectRevert(
             abi.encodeWithSignature("NotEnoughNative(uint256)", _value)
         );
-        expander1.expandToken{value: _value}(proxy1, bEid);
+        Expander(expander1).expandToken{value: _value}(proxy1, bEid);
     }
 }

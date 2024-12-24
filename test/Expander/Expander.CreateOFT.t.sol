@@ -20,7 +20,7 @@ contract ExpanderTest is Test, SetupExpandableSystem {
 
         address oft = implementationOFT.token();
 
-        Expander expander = new Expander(oft, endpoints[aEid]);
+        Expander expander = new Expander(oft, endpoints[aEid], owner);
 
         address proxy = expander.createOFT(name, symbol, users, amounts, owner);
 
@@ -35,12 +35,14 @@ contract ExpanderTest is Test, SetupExpandableSystem {
         implementationOFT = new ImplementationOFT(lzEndpoint);
         address oft = implementationOFT.token();
 
-        Expander expander = new Expander(oft, address(endpoints[bEid]));
+        Expander expander = new Expander(oft, address(endpoints[bEid]), owner);
 
         address proxy = expander.createOFT(name, symbol, users, amounts, owner);
 
+        vm.startPrank(userB);
         address proxy2 = expander.createOFT(name, symbol, users, amounts, userB);
 
+        vm.startPrank(owner);
         // owner
         ImplementationOFT(proxy).setPeer(10, bytes32(uint256(uint160(userB))));
 
@@ -57,7 +59,7 @@ contract ExpanderTest is Test, SetupExpandableSystem {
         implementationOFT = new ImplementationOFT(lzEndpoint);
         address oft = implementationOFT.token();
 
-        Expander expander = new Expander(oft, address(endpoints[bEid]));
+        Expander expander = new Expander(oft, address(endpoints[bEid]), owner);
 
         vm.expectRevert(ImplementationOFT.WrongAllocationParams.selector);
         address proxy = expander.createOFT(name, symbol, users, amounts, owner);
@@ -71,9 +73,21 @@ contract ExpanderTest is Test, SetupExpandableSystem {
         implementationOFT = new ImplementationOFT(lzEndpoint);
         address oft = implementationOFT.token();
 
-        Expander expander = new Expander(oft, address(endpoints[bEid]));
+        Expander expander = new Expander(oft, address(endpoints[bEid]), owner);
 
         vm.expectRevert(ImplementationOFT.ZeroAddress.selector);
         address proxy = expander.createOFT(name, symbol, users, amounts, owner);
+    }
+
+    function test_RevertIf_SymbolNameTooLong() public {
+        symbol = "a lof of symbols";
+
+        implementationOFT = new ImplementationOFT(lzEndpoint);
+        address oft = implementationOFT.token();
+
+        Expander expander = new Expander(oft, address(endpoints[bEid]), owner);
+
+        vm.expectRevert(Expander.SymbolNameTooLong.selector);
+        expander.createOFT(name, symbol, users, amounts, owner);
     }
 }

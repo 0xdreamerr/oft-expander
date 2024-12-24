@@ -60,16 +60,23 @@ contract TokenSendTest is TestHelperOz5, SetupExpandableSystem {
 
         vm.startPrank(owner);
 
+        vm.selectFork(arbFork);
+        vm.deal(owner, 10 ether);
+
         ImplementationOFT(proxy1).sendTokens{value: _value}(
             bEid, owner, tokensToSend
         );
 
+        vm.selectFork(optFork);
         verifyPackets(bEid, bytes32(uint256(uint160(proxy2))));
 
+        vm.selectFork(arbFork);
         assertEq(
             ImplementationOFT(proxy1).balanceOf(owner),
             amounts[0] - tokensToSend
         );
+
+        vm.selectFork(optFork);
         assertEq(
             ImplementationOFT(proxy2).balanceOf(owner),
             amounts[0] + tokensToSend
@@ -120,6 +127,7 @@ contract TokenSendTest is TestHelperOz5, SetupExpandableSystem {
             abi.encodeWithSignature("NotEnoughNative(uint256)", _value)
         );
 
+        vm.selectFork(arbFork);
         ImplementationOFT(proxy1).sendTokens{value: _value}(
             bEid, owner, tokensToSend
         );
