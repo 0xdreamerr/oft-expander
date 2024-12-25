@@ -1,0 +1,24 @@
+{
+	"scripts": {
+		"prettier": "npx prettier --write '**/*.json'",
+		"prepare": "npx husky",
+		"lint": "npm run lint:src && npm run lint:test",
+		"lint:fix": "npx solhint -c src/.solhint.json --fix --noPrompt src/**/*.sol && npx solhint -c test/.solhint.json --fix --noPrompt test/**/*.sol",
+		"lint:src": "npx solhint -c src/.solhint.json src/**/*.sol",
+		"lint:src:fix": "npx solhint -c src/.solhint.json --fix src/**/*.sol",
+		"lint:test": "npx solhint -c test/.solhint.json test/**/*.sol",
+		"lint:test:fix": "npx solhint -c test/.solhint.json --fix test/**/*.sol"
+	},
+	"dependencies": {
+		"@layerzerolabs/create3-factory": "^3.0.27",
+		"@layerzerolabs/lz-evm-v1-0.7": "^3.0.22",
+		"@openzeppelin/contracts": "^5.0.2",
+		"@openzeppelin/contracts-upgradeable": "^5.1.0",
+		"solidity-bytes-utils": "^0.8.0"
+	},
+	"devDependencies": {
+		"husky": "^9.0.10",
+		"prettier": "^3.4.2",
+		"solhint": "^5.0.3"
+	}
+}
